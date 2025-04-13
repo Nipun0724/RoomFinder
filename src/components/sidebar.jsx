@@ -1,27 +1,21 @@
 import { jwtDecode } from "jwt-decode";
 import { User } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 
 export function Sidebar() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const navigate = useNavigate();
-
-  useEffect(() => {
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
     const token = localStorage.getItem("token");
-    if (token) {
-      try {
-        const decodedToken = jwtDecode(token);
-        if (decodedToken.email) {
-          setIsLoggedIn(true);
-          return;
-        }
-      } catch (error) {
-        console.error("Invalid token:", error);
-      }
+    if (!token) return false;
+    try {
+      const decodedToken = jwtDecode(token);
+      return !!decodedToken.email;
+    } catch (err) {
+      return false;
     }
-    setIsLoggedIn(false);
-  }, []);
+  });
+
+  const navigate = useNavigate();
 
   const handleLogOut = () => {
     localStorage.removeItem("token");
@@ -54,11 +48,17 @@ export function Sidebar() {
           User Profile
         </Link>
         {isLoggedIn ? (
-          <a onClick={handleLogOut} className="block py-2 px-4 hover:bg-[var(--primary-dark)] rounded cursor-pointer">
+          <button
+            onClick={handleLogOut}
+            className="block w-full text-left py-2 px-4 hover:bg-[var(--primary-dark)] rounded cursor-pointer"
+          >
             Logout
-          </a>
+          </button>
         ) : (
-          <a href="http://localhost:5000/auth/google" className="block py-2 px-4 hover:bg-[var(--primary-dark)] rounded cursor-pointer">
+          <a
+            href="http://localhost:5000/auth/google"
+            className="block py-2 px-4 hover:bg-[var(--primary-dark)] rounded cursor-pointer"
+          >
             Login
           </a>
         )}
@@ -66,3 +66,4 @@ export function Sidebar() {
     </div>
   );
 }
+

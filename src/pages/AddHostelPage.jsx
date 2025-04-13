@@ -20,23 +20,24 @@ export default function AddHostelPage() {
   const [token, setToken]=useState(null);
   const navigate = useNavigate()
   useEffect(() => {
-        const token = localStorage.getItem("token");
-        if (token) {
-          try {
-            const decodedToken = jwtDecode(token);
-            if (decodedToken.email) {
-              setToken(token)
-              return;
-            }
-          } catch (error) {
-            toast.error("You must be logged in to submit a review.");
-            navigate("/");
-          }
-        }else{
-          toast.error("You must be logged in to submit a review.");
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decodedToken = jwtDecode(token);
+        if (!decodedToken.isAdmin) {
           navigate("/");
         }
-      }, []);
+        else if (decodedToken.email) {
+          setToken(token);
+          return;
+        }
+      } catch (error) {
+        navigate("/");
+      }
+    } else {
+      navigate("/");
+    }
+  }, []);  
 
   const handleChange = (e) => {
     const { name, value } = e.target;

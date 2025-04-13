@@ -1,26 +1,19 @@
-import { jwtDecode } from "jwt-decode"; // ✅ Added import
-import { useState, useEffect } from "react";
+import { jwtDecode } from "jwt-decode";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 
 export function Navbar() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const navigate = useNavigate();
-
-  useEffect(() => {
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
     const token = localStorage.getItem("token");
-    if (token) {
-      try {
-        const decodedToken = jwtDecode(token);
-        if (decodedToken.email) {
-          setIsLoggedIn(true);
-          return;
-        }
-      } catch (error) {
-        console.error("Invalid token:", error);
-      }
+    if (!token) return false;
+    try {
+      const decodedToken = jwtDecode(token);
+      return !!decodedToken.email;
+    } catch (err) {
+      return false;
     }
-    setIsLoggedIn(false);
-  }, []);
+  });
+  const navigate = useNavigate();
 
   const handleLogOut = () => {
     localStorage.removeItem("token");

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Sidebar } from "../components/sidebar";
-import { useNavigate } from "react-router";
+import { useNavigate, Link } from "react-router";
 import axios from "axios";
 import { StarRating } from "../components/star-rating";
 import { jwtDecode } from "jwt-decode";
@@ -12,11 +12,12 @@ export default function ProfilePage() {
   const [email, setEmail] = useState("");
   const [reviews, setReviews] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      navigate("/");
+      navigate("/home");
       return;
     }
 
@@ -27,6 +28,8 @@ export default function ProfilePage() {
         if (!id) {
           throw new Error("Email not found in token");
         }
+
+        setIsAdmin(decodedToken.isAdmin || false); // Set admin status
 
         const response = await axios.get("http://localhost:5000/api/profile", {
           headers: { Authorization: `Bearer ${token}` },
@@ -49,7 +52,7 @@ export default function ProfilePage() {
     <div className="flex min-h-screen">
       <Sidebar />
       <div className="flex-1 p-6 mt-[10%]">
-        <div className="max-w-md mx-auto bg-white rounded-lg shadow-sm p-6">
+        <div className="max-w-md mx-auto bg-white rounded-lg shadow-lg p-6">
           <div className="flex flex-col items-center">
             <div className="mb-4">
               <img
@@ -65,19 +68,41 @@ export default function ProfilePage() {
             <p className="text-gray-600">{regNumber}</p>
             <p className="text-gray-600 mb-6">{email}</p>
 
-              
+            {/* Buttons in a Row */}
+            <div className="flex gap-4 justify-center mt-4 w-full">
               <button
-                className="bg-[#0097b2] text-white px-4 py-2 rounded hover:bg-[#007a8f]"
+                className="bg-[#0097b2] text-white px-3 py-2 rounded hover:bg-[#007a8f]"
                 onClick={() => setIsOpen(!isOpen)}
               >
-                {isOpen ? "Hide Review History": "Show Review History"}
+                {isOpen ? "Hide Reviews" : "Show Reviews"}
               </button>
+
+              {isAdmin && (
+                  <Link to="/admin/add-hostel">
+                    <button className="bg-[#0097b2] text-white px-3 py-2 rounded hover:bg-[#007a8f]">
+                      Add Hostel
+                    </button>
+                  </Link>
+              )}
+              {isAdmin && (
+                  <Link to="/admin/edit-hostel">
+                  <button className="bg-[#0097b2] text-white px-3 py-2 rounded hover:bg-[#007a8f]">
+                    Edit Hostel Info
+                  </button>
+                </Link>
+              )}
+            </div>
           </div>
         </div>
+
+        {/* Review History Section */}
         {isOpen && (
-          <div className="flex justify-center mt-[5%]">
+          <div className="flex justify-center mt-[5%] flex-wrap gap-4">
             {reviews?.map((review, index) => (
-              <div key={index} className="flex items-center border rounded-md p-4 max-w-[30%]">
+              <div
+                key={index}
+                className="flex items-center border rounded-md p-4 max-w-[30%]"
+              >
                 <div className="flex-1">
                   <StarRating rating={review.rating} />
                   <p>{review.review}</p>

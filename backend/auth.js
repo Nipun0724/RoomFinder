@@ -2,6 +2,9 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import jwt from "jsonwebtoken";
 import { createClient } from "@supabase/supabase-js";
+import dotenv from 'dotenv'
+
+dotenv.config({ path: '../.env' })
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
 const supabaseKey = process.env.VITE_SUPABASE_KEY;
@@ -33,11 +36,11 @@ passport.use(
 
       let token;
       if (error || !user) {
-        token = jwt.sign({ email }, jwtSecret, { expiresIn: "1h" });
+        token = jwt.sign({ email,isAdmin: false }, jwtSecret, { expiresIn: "1h" });
         return done(null, { ...profile, newUser: true, token });
       }
 
-      token = jwt.sign({ id: user.id, email: user.email }, jwtSecret, { expiresIn: "1h" });
+      token = jwt.sign({ id: user.id, email: user.email, isAdmin: user.isAdmin }, jwtSecret, { expiresIn: "1h" });
 
       return done(null, { ...user, token });
     }

@@ -9,6 +9,9 @@ import "./auth.js";
 import multer from "multer";
 import cloudinary from "cloudinary"
 import fs from "fs"
+import dotenv from 'dotenv'
+
+dotenv.config({ path: '../.env' })
 
 const app = express();
 
@@ -72,6 +75,30 @@ const verifyToken = (req, res, next) => {
   });
 };
 
+const verifyAdminToken = (req, res, next) => {
+  const authHeader = req.headers["authorization"];
+  if (!authHeader) {
+    return res.status(401).json({ error: "No token provided" });
+  }
+
+  const token = authHeader.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: "No token provided" });
+  }
+
+  jwt.verify(token, jwtSecret, (err, decoded) => {
+    if (err) {
+      return res.status(401).json({ error: "Failed to authenticate token" });
+    }
+    req.email = decoded.email;
+    if (decoded.isAdmin == true) {
+      return next();
+    } else {
+      return res.status(403).json({ error: "You are not authorized as admin" });
+    }
+  });
+};
+
 const uploadCloudinary = async (localFilePath) => {
   try {
     const response = await cloudinary.uploader.upload(localFilePath, {
@@ -94,12 +121,9 @@ const uploadCloudinary = async (localFilePath) => {
 
 app.post("/upload/pic", upload.single("avatar"), async (req, res) => {
   try {
-    // console.log("File received:", req.file.path);
     const responseUrl = await uploadCloudinary(req.file.path);
-    // console.log("Clodinary URL is:", responseUrl)
     res.json({ picUrl: responseUrl });
   } catch (error) {
-    // console.error("Error in /upload/pic route:", error.message);
     res.status(500).send("Error uploading image");
   }
 });
@@ -275,7 +299,7 @@ app.get("/api/profile",verifyToken,async(req,res)=>{
   }
 })
 
-app.post("/api/add-hostels", verifyToken, async (req, res) => {
+app.post("/api/add-hostels", verifyAdminToken, async (req, res) => {
   try {
     const { name, sex, description, rooms, amenities, image } = req.body;
     
@@ -290,7 +314,7 @@ app.post("/api/add-hostels", verifyToken, async (req, res) => {
   }
 });
 
-app.put("/api/edit-hostel/:id",verifyToken, async (req, res) => {
+app.put("/api/edit-hostel/:id",verifyAdminToken, async (req, res) => {
   const { id } = req.params;
   const { name, sex, description, rooms, amenities, image } = req.body;
 

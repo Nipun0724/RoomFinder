@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { Sidebar } from "../components/sidebar";
 import { useNavigate } from "react-router";
+import { jwtDecode } from "jwt-decode";
 
 export default function EditHostelPage() {
   const [hostels, setHostels] = useState([]);
@@ -25,9 +26,19 @@ export default function EditHostelPage() {
     if (!storedToken) {
       navigate("/");
     } else {
-      setToken(storedToken);
+      try {
+        const decodedToken = jwtDecode(storedToken);
+        if (!decodedToken.isAdmin) {
+          navigate("/"); // redirect if not admin
+        } else {
+          setToken(storedToken);
+        }
+      } catch (err) {
+        console.error("Invalid token");
+        navigate("/");
+      }
     }
-  }, [navigate]);
+  }, [navigate]);  
 
   useEffect(() => {
     const fetchHostels = async () => {
