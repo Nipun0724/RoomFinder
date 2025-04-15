@@ -18,7 +18,6 @@ const App = () => {
     <ToastContainer position="top-right" autoClose={3000} />
     <Routes>
       <Route path='/' element={<Home/>}/>
-      <Route path='/home' element={<Home/>}/>
       <Route path="/register" element={<Register/>}/>
       <Route path="/admin/add-hostel" element={<AddHostelPage/>}/>
       <Route path="/admin/edit-hostel" element={<EditHostelPage/>}/>
