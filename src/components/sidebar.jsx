@@ -56,7 +56,7 @@ export function Sidebar() {
           </button>
         ) : (
           <a
-            href="http://localhost:5000/auth/google"
+            href="https://roomfinder-0ouu.onrender.com/auth/google"
             className="block py-2 px-4 hover:bg-[var(--primary-dark)] rounded cursor-pointer"
           >
             Login

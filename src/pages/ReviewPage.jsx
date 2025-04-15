@@ -49,7 +49,7 @@ export default function ReviewPage() {
 
     try {
       await axios.post(
-        "http://localhost:5000/api/addReview",
+        "https://roomfinder-0ouu.onrender.com/api/addReview",
         {
           hostelId,
           roomType,

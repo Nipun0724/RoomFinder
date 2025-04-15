@@ -16,7 +16,7 @@ export default function HostelPage() {
 
     const fetchHostel = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/hostel", {
+        const response = await axios.get("https://roomfinder-0ouu.onrender.com/api/hostel", {
           params: { hostelId },
         });
         console.log("API Response:", response.data);

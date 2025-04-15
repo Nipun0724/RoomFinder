@@ -14,7 +14,7 @@ export default function HostelsPage() {
   useEffect(() => {
     const fetchHostels = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/hostels");
+        const response = await axios.get("https://roomfinder-0ouu.onrender.com/api/hostels");
         setHostels(response.data.hostels);
         console.log(response.data.hostels)
       } catch (error) {

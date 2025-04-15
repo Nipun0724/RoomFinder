@@ -71,7 +71,7 @@ export default function AddHostelPage() {
     formData2.append("avatar", file);
   
     try {
-      const response = await axios.post("http://localhost:5000/upload/pic", formData2, {
+      const response = await axios.post("https://roomfinder-0ouu.onrender.com/upload/pic", formData2, {
         headers: { "Content-Type": "multipart/form-data" },
       });
   
@@ -108,7 +108,7 @@ export default function AddHostelPage() {
       formData.append("avatar", file);
 
       try {
-        const response = await axios.post("http://localhost:5000/upload/pic", formData, {
+        const response = await axios.post("https://roomfinder-0ouu.onrender.com/upload/pic", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         setFormData((prevFormData) => {
@@ -171,7 +171,7 @@ export default function AddHostelPage() {
     };
   
     try {
-      await axios.post("http://localhost:5000/api/add-hostels", hostelData, {
+      await axios.post("https://roomfinder-0ouu.onrender.com/api/add-hostels", hostelData, {
         headers: { Authorization: `Bearer ${token}` },
       });
       

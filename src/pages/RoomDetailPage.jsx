@@ -17,7 +17,7 @@ export default function RoomDetailPage() {
 
     const fetchRoom = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/hostelRoom", {
+        const response = await axios.get("https://roomfinder-0ouu.onrender.com/api/hostelRoom", {
           params: { roomType, hostelId },
         });
         setRoomData(response.data.rooms[0]);

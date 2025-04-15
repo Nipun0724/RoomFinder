@@ -48,7 +48,7 @@ export default function Register() {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/register",
+        "https://roomfinder-0ouu.onrender.com/api/register",
         { name, reg },
         { headers: { Authorization: `Bearer ${token}` } }
       );

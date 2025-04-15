@@ -31,7 +31,7 @@ export default function ProfilePage() {
 
         setIsAdmin(decodedToken.isAdmin || false); // Set admin status
 
-        const response = await axios.get("http://localhost:5000/api/profile", {
+        const response = await axios.get("https://roomfinder-0ouu.onrender.com/api/profile", {
           headers: { Authorization: `Bearer ${token}` },
         });
 

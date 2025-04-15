@@ -39,7 +39,7 @@ export function Navbar() {
               Logout
             </button>
           ) : (
-            <a href="http://localhost:5000/auth/google">
+            <a href="https://roomfinder-0ouu.onrender.com/auth/google">
               <button className="focus:outline-none">Sign-in</button>
             </a>
           )}
