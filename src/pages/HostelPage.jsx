@@ -3,8 +3,6 @@ import { useParams } from "react-router";
 import { Link } from "react-router";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import hostelPic from "../assets/hostel.jpg";
-import roomPic from "../assets/room.jpg";
 
 export default function HostelPage() {
   const { hostelId } = useParams();
@@ -43,7 +41,7 @@ export default function HostelPage() {
           <div className="flex flex-col md:flex-row gap-6">
             <div className="md:w-1/3">
               <img
-                src={hostelPic || "https://picsum.photos/200"}
+                src={hostel.image || "https://picsum.photos/200"}
                 alt={hostel.name}
                 width={300}
                 height={200}
@@ -69,7 +67,7 @@ export default function HostelPage() {
                 <div className="flex-1">
                   <h3 className="font-medium">{room.type}</h3>
                   <img
-                    src={roomPic || "https://picsum.photos/200"}
+                    src={room.image || "https://picsum.photos/200"}
                     alt={room.type}
                     width={150}
                     height={90}

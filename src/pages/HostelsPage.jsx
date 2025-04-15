@@ -5,7 +5,6 @@ import { Search } from "lucide-react";
 import { Link } from "react-router";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import hostelPic from "../assets/hostel.jpg"
 
 export default function HostelsPage() {
   const [hostels, setHostels] = useState([]);
@@ -55,7 +54,7 @@ export default function HostelsPage() {
                 <div className="">
                   <h3 className="font-medium">{hostel.name}</h3>
                   <img
-                    src={hostelPic || "https://picsum.photos/200"}
+                    src={hostel.image || "https://picsum.photos/200"}
                     alt={hostel.name}
                     width={120}
                     height={100}

@@ -3,7 +3,6 @@ import { Sidebar } from "../components/sidebar";
 import { StarRating } from "../components/star-rating";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import hostelPic from "../assets/room.jpg";
 
 
 export default function RoomDetailPage() {
@@ -50,7 +49,7 @@ export default function RoomDetailPage() {
         <div className="flex flex-col md:flex-row gap-6 mb-6">
           <div className="md:w-1/3">
             <img
-              src={hostelPic || "https://picsum.photos/200"}
+              src={roomData.image || "https://picsum.photos/200"}
               alt={roomData.type}
               width={300}
               height={200}
