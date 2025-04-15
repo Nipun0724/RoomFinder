@@ -330,7 +330,7 @@ app.put("/api/edit-hostel/:id",verifyAdminToken, async (req, res) => {
   }
 });
 
-if (process.env.NODE_ENV === "production") {
+if (process.env.VITE_NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname1, "dist")));
 
   app.get("*", (req, res) =>
