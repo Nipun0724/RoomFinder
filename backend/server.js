@@ -10,6 +10,7 @@ import multer from "multer";
 import cloudinary from "cloudinary"
 import fs from "fs"
 import dotenv from 'dotenv'
+import path from "path";
 
 dotenv.config({ path: '../.env' })
 
@@ -48,6 +49,8 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage });
+
+const __dirname1 = path.resolve();
 
 cloudinary.config({
   cloud_name:process.env.VITE_CLOUD_NAME,
