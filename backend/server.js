@@ -146,7 +146,7 @@ app.get(
     const token = req.user.token;
 
     const frontendBaseURL =
-      process.env.NODE_ENV === "production"
+      process.env.VITE_NODE_ENV === "production"
         ? "https://roomfinder-0ouu.onrender.com"
         : "http://localhost:5173";
 
