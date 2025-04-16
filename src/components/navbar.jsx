@@ -1,19 +1,37 @@
 import { jwtDecode } from "jwt-decode";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router";
 
 export function Navbar() {
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return false;
-    try {
-      const decodedToken = jwtDecode(token);
-      return !!decodedToken.email;
-    } catch (err) {
-      return false;
-    }
-  });
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setIsLoggedIn(false);
+        return;
+      }
+      try {
+        const decodedToken = jwtDecode(token);
+        setIsLoggedIn(!!decodedToken.email);
+      } catch (err) {
+        setIsLoggedIn(false);
+      }
+    };
+  
+    checkAuth();
+  
+    window.addEventListener("storage", checkAuth);
+    window.addEventListener("load", checkAuth);
+
+    return () => {
+      window.removeEventListener("storage", checkAuth);
+      window.removeEventListener("load", checkAuth);
+    };
+  }, []);
+  
 
   const handleLogOut = () => {
     localStorage.removeItem("token");
