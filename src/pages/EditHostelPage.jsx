@@ -3,6 +3,7 @@ import axios from "axios";
 import { Sidebar } from "../components/sidebar";
 import { useNavigate } from "react-router";
 import { jwtDecode } from "jwt-decode";
+import { toast } from "react-toastify";
 
 export default function EditHostelPage() {
   const [hostels, setHostels] = useState([]);
@@ -170,6 +171,7 @@ export default function EditHostelPage() {
       );
 
       toast.success("Hostel updated successfully!");
+      navigate("/hostels");
     } catch (error) {
       console.error("Error updating hostel:", error);
       toast.error("Failed to update hostel.");
