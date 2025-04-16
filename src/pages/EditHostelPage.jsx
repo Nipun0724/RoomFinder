@@ -29,7 +29,7 @@ export default function EditHostelPage() {
       try {
         const decodedToken = jwtDecode(storedToken);
         if (!decodedToken.isAdmin) {
-          navigate("/"); // redirect if not admin
+          navigate("/");
         } else {
           setToken(storedToken);
         }

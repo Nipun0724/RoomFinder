@@ -19,7 +19,10 @@ passport.use(
     {
       clientID: googleClientId,
       clientSecret: googleClientSecret,
-      callbackURL: "/auth/google/callback",
+      callbackURL:
+        process.env.VITE_NODE_ENV === "production"
+          ? "https://roomfinder-0ouu.onrender.com/auth/google/callback"
+          : "http://localhost:5000/auth/google/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
       const email = profile.emails[0].value;

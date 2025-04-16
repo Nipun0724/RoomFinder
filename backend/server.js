@@ -146,7 +146,7 @@ app.get(
     const token = req.user.token;
 
     const frontendBaseURL =
-      process.env.VITE_NODE_ENV === "production"
+      process.env.VITE_NODE_ENV == "production"
         ? "https://roomfinder-0ouu.onrender.com"
         : "http://localhost:5173";
 
@@ -155,6 +155,7 @@ app.get(
     res.redirect(`${frontendBaseURL}${redirectPath}?token=${token}`);
   }
 );
+
 
 app.post("/api/register",verifyToken, async (req, res) => {
   const { name, reg } = req.body;
