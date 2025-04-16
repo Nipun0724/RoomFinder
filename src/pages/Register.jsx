@@ -18,6 +18,7 @@ export default function Register() {
     const tokenFromUrl = urlParams.get("token");
 
     if (tokenFromUrl) {
+      localStorage.setItem("token",tokenFromUrl);
       setToken(tokenFromUrl);
     } else {
       toast.error("No authentication token found.");
