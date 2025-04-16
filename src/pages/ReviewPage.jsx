@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import { jwtDecode } from "jwt-decode";
 
 export default function ReviewPage() {
-  const { hostelId, roomType } = useParams();
+  const { roomId } = useParams();
   const navigate = useNavigate();
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState("");
@@ -51,8 +51,7 @@ export default function ReviewPage() {
       await axios.post(
         "https://roomfinder-0ouu.onrender.com/api/addReview",
         {
-          hostelId,
-          roomType,
+          roomId,
           rating,
           review,
         },
@@ -62,7 +61,7 @@ export default function ReviewPage() {
       );
 
       toast.success("Review submitted successfully!");
-      navigate(`/hostels/${hostelId}/${roomType}`);
+      navigate(`/hostels/rooms/${roomId}`);
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to submit review. Please try again.");
       console.error("Error submitting review:", error);

@@ -200,13 +200,33 @@ app.get("/api/hostel", async (req, res) => {
   if (!hostelId) return res.status(400).json({ message: "Hostel ID is required" });
 
   try {
-      let { data: hostel, error } = await supabase.from('hostels').select('*').eq("name", hostelId).single();
-      if (error) throw error;
+    let { data: hostel, error } = await supabase
+      .from("hostels")
+      .select("*")
+      .eq("name", hostelId)
+      .single();
 
-      res.status(200).json({ hostel });
+    if (error) throw error;
+
+    const roomIds = (hostel.rooms || []).map(room => parseInt(room.id)).filter(id => !isNaN(id));
+
+    let roomData = [];
+
+    if (roomIds.length > 0) {
+      const { data: rooms, error: roomError } = await supabase
+        .from("rooms")
+        .select("*")
+        .in("id", roomIds);
+
+      if (roomError) throw roomError;
+
+      roomData = rooms;
+    }
+
+    res.status(200).json({ hostel, rooms: roomData });
   } catch (err) {
-      console.error("Error fetching details of hostel:", err.message);
-      res.status(500).json({ message: "An error occurred while fetching hostel details" });
+    console.error("Error fetching details of hostel:", err.message);
+    res.status(500).json({ message: "An error occurred while fetching hostel details" });
   }
 });
 
@@ -216,7 +236,22 @@ app.get("/api/hostel/:id",verifyToken, async (req, res) => {
   try {
       let { data: hostel, error } = await supabase.from('hostels').select('*').eq("id", id).single();
       if (error) throw error;
-      res.status(200).json({ hostel });
+      const roomIds = (hostel.rooms || []).map(room => parseInt(room.id)).filter(id => !isNaN(id));
+
+      let roomData = [];
+
+      if (roomIds.length > 0) {
+        const { data: rooms, error: roomError } = await supabase
+          .from("rooms")
+          .select("*")
+          .in("id", roomIds);
+
+        if (roomError) throw roomError;
+
+        roomData = rooms;
+      }
+
+      res.status(200).json({ hostel, rooms: roomData });
   } catch (err) {
       console.error("Error fetching details of hostel:", err.message);
       res.status(500).json({ message: "An error occurred while fetching hostel details" });
@@ -224,19 +259,16 @@ app.get("/api/hostel/:id",verifyToken, async (req, res) => {
 });
 
 app.get("/api/hostelRoom", async (req, res) => {
-  const { roomType, hostelId } = req.query;
-  if (!roomType || !hostelId) {
-    return res.status(400).json({ message: "roomType and hostelId are required" });
+  const { roomId } = req.query;
+  if (!roomId) {
+    return res.status(400).json({ message: "roomId is required" });
   }
-
   try {
     let { data: rooms, error } = await supabase
       .from("rooms")
       .select("*")
-      .eq("type", roomType)
-      .eq("block", hostelId);
+      .eq("id", roomId);
     if (error) throw error;
-
     res.status(200).json({ rooms });
   } catch (err) {
     console.error("Error fetching hostel rooms:", err.message);
@@ -244,28 +276,29 @@ app.get("/api/hostelRoom", async (req, res) => {
   }
 });
 
-app.post("/api/addReview",verifyToken, async (req, res) => {
-  const { roomType,hostelId, rating, review } = req.body;
-  const email=req.email;
+app.post("/api/addReview", verifyToken, async (req, res) => {
+  const { roomId, rating, review } = req.body;
+  const email = req.email;
+
   try {
     const { data, error } = await supabase
       .from("rooms")
       .select("reviews")
-      .eq("type", roomType)
-      .eq("block", hostelId);
+      .eq("id", roomId);
 
     if (error) throw error;
-    
-    const existingReviews = data.reviews || [];
 
-    const { data:user, fetchError } = await supabase
+    const existingReviews = (data && data.length > 0 && data[0].reviews) || [];
+
+    const { data: user, error: fetchError } = await supabase
       .from("users")
       .select("*")
       .eq("email", email)
       .single();
 
+    if (fetchError) throw fetchError;
+
     const existingUserReviews = user.reviews || [];
-    if(fetchError) throw fetchError;
 
     const updatedReviews = [{ name: user.name, rating, review }, ...existingReviews];
     const updatedUserReviews = [{ rating, review }, ...existingUserReviews];
@@ -273,8 +306,7 @@ app.post("/api/addReview",verifyToken, async (req, res) => {
     const { error: updateError } = await supabase
       .from("rooms")
       .update({ reviews: updatedReviews })
-      .eq("type", roomType)
-      .eq("block", hostelId);
+      .eq("id", roomId);
 
     const { error: updateUserError } = await supabase
       .from("users")
@@ -340,18 +372,84 @@ app.post("/api/add-hostels", verifyAdminToken, async (req, res) => {
   }
 });
 
-app.put("/api/edit-hostel/:id",verifyAdminToken, async (req, res) => {
+app.post("/api/delete-room/:id",verifyAdminToken,async(req,res)=>{
+  const {id}=req.params;
+  console.log(id);
+  try {
+    const { error: deleteError } = await supabase
+      .from("rooms")
+      .delete()
+      .eq("id", id);
+    if(deleteError) throw deleteError;
+    res.status(200).json({ message: "Room deleted successfully"});
+  } catch (error) {
+    res.status(500).json({ message: "Room deletion unsuccessfull"});
+  }
+})
+
+app.post("/api/add-room", verifyAdminToken, async (req, res) => {
+  const { block, type, amenities, price, image } = req.body;
+  try {
+    const { data, error: insertError } = await supabase
+      .from("rooms")
+      .insert({
+        block,
+        type,
+        amenities,
+        price,
+        image,
+      })
+      .select();
+
+    if (insertError) throw insertError;
+
+    res.status(201).json({ message: "Room inserted successfully", index: data[0].id });
+  } catch (error) {
+    res.status(500).json({ message: "Room insertion unsuccessful", error });
+  }
+});
+
+app.put("/api/update-room", verifyAdminToken, async (req, res) => {
+  const { id, block, type, amenities, price, image } = req.body;
+  try {
+    const { error: updateError } = await supabase
+      .from("rooms")
+      .update({ block, type, amenities, price, image })
+      .eq("id", id);
+
+    if (updateError) throw updateError;
+
+    res.status(201).json({ message: "Room updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Room update unsuccessful" });
+  }
+});
+
+app.put("/api/edit-hostel/:id", verifyAdminToken, async (req, res) => {
   const { id } = req.params;
   const { name, sex, description, rooms, amenities, image } = req.body;
 
+  console.log(`Updating hostel with ID: ${id}`);
+  console.log("Received data:", { name, sex, description, rooms, amenities, image });
+
   try {
-    const { data, error } = await supabase
+
+    const { data: hostelData, error: hostelError } = await supabase
       .from("hostels")
       .update({ name, sex, description, rooms, amenities, image })
       .eq("id", id);
-      if(error) throw error
-      res.status(201).json({ message: "Hostel updated successfully", data });
+
+    if (hostelError) {
+      console.error("Error updating hostel:", hostelError.message);
+      throw hostelError;
+    }
+
+    console.log("Hostel updated successfully:", hostelData);
+
+    res.status(201).json({ message: "Hostel and rooms updated successfully", data: hostelData });
+
   } catch (error) {
+    console.error("Error in PUT /api/edit-hostel/:id:", error.message);
     res.status(500).json({ message: "Error updating hostel", error: error.message });
   }
 });

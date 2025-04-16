@@ -14,10 +14,11 @@ export default function EditHostelPage() {
     name: "",
     sex: "",
     description: "",
-    rooms: [{ type: "",image: "" }],
+    rooms: [{ id:"", type: "", image: "", amenities: "", price: ""}],
     amenities: "",
     image: "",
   });
+  
   const [uploadingHostel, setUploadingHostel] = useState(false);
   const [uploadingRoom, setUploadingRoom] = useState(null);
   const [token, setToken]=useState(null);
@@ -63,7 +64,11 @@ export default function EditHostelPage() {
           headers: { Authorization: `Bearer ${token}` },
         });
         
-        setFormData(response.data.hostel);
+        setFormData({
+          ...response.data.hostel,
+          rooms: response.data.rooms || [],
+        });
+        
       } catch (error) {
         console.error("Error fetching hostel details:", error);
       } finally {
@@ -91,15 +96,44 @@ export default function EditHostelPage() {
   const addRoomType = () => {
     setFormData({
       ...formData,
-      rooms: [...formData.rooms, { type: "", capacity: "", price: "", image: "" }],
+      rooms: [...formData.rooms, { id:"", type: "", image: "", amenities: "", price: "" }],
     });
-  };
+  }; 
 
-  const removeRoomType = (index) => {
+  const removeRoomType = async (roomId) => {
+    const roomIndex = formData.rooms.findIndex((room) => room.id === roomId);
+  
+    if (roomIndex === -1) {
+      console.warn("Room not found");
+      return;
+    }
+  
+    const roomToRemove = formData.rooms[roomIndex];
+  
+    if (roomToRemove.id) {
+      try {
+        await axios.post(
+          `https://roomfinder-0ouu.onrender.com/api/delete-room/${roomId}`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+  
+        console.log("Room deleted successfully");
+      } catch (error) {
+        console.error("Error deleting room:", error.response?.data?.message || error.message);
+        return;
+      }
+    }
+  
     const updatedRooms = [...formData.rooms];
-    updatedRooms.splice(index, 1);
+    updatedRooms.splice(roomIndex, 1);
     setFormData({ ...formData, rooms: updatedRooms });
   };
+  
 
   const handleRoomImageUpload = async (index, file) => {
     if (!file) return;
@@ -149,6 +183,58 @@ export default function EditHostelPage() {
     }
   };
 
+  const handleInsertRoom = async (index) => {
+    const room = formData.rooms[index];
+    try {
+      const response = await axios.post(
+        "https://roomfinder-0ouu.onrender.com/api/add-room",
+        {
+          block: formData.name,
+          type: room.type,
+          amenities: room.amenities.split(",").map((a) => a.trim()),
+          price: room.price,
+          image: room.image,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+  
+      const insertedRoom = response.data.index;
+      const updatedRooms = [...formData.rooms];
+      updatedRooms[index].id = insertedRoom;
+      setFormData({ ...formData, rooms: updatedRooms });
+      toast.success("Room inserted successfully!");
+    } catch (error) {
+      console.error("Failed to insert room:", error);
+      toast.error("Failed to insert room.");
+    }
+  };
+  
+  const handleUpdateRoom = async (index) => {
+    const room = formData.rooms[index];
+    try {
+      await axios.put(
+        "https://roomfinder-0ouu.onrender.com/api/update-room",
+        {
+          block: formData.name,
+          id: room.id,
+          type: room.type,
+          amenities: room.amenities,
+          price: room.price,
+          image: room.image,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      toast.success("Room updated successfully!");
+    } catch (error) {
+      console.error("Failed to update room:", error);
+      toast.error("Failed to update room.");
+    }
+  };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -156,10 +242,13 @@ export default function EditHostelPage() {
       name: formData.name,
       sex: formData.sex,
       description: formData.description,
-      rooms: formData.rooms,
-      amenities: Array.isArray(formData.amenities) ? formData.amenities : formData.amenities.split(",").map((a) => a.trim()),
-      image: formData.image
+      image: formData.image,
+      amenities: Array.isArray(formData.amenities)
+        ? formData.amenities
+        : formData.amenities.split(",").map((a) => a.trim()),
+      rooms: formData.rooms.map((room) => ({ id: room.id.toString() })),
     };
+    
     try {
 
       await axios.put(
@@ -256,41 +345,83 @@ export default function EditHostelPage() {
               <div>
                 <label className="block text-sm font-medium mb-2">Room Types</label>
                 {formData.rooms.map((room, index) => (
-                <div key={index} className="border p-3 mb-3 rounded-md">
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="text"
-                      value={room.type}
-                      onChange={(e) => handleRoomTypeChange(index, "type", e.target.value)}
-                      className="flex-1 p-2 border border-gray-300 rounded"
-                      placeholder="Room type (e.g., 2-bed, 4-bed)"
-                      required
-                    />
+                  <div key={index} className="border p-3 mb-3 rounded-md">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-sm font-medium">Room Type</label>
+                        <input
+                          type="text"
+                          value={room.type}
+                          onChange={(e) => handleRoomTypeChange(index, "type", e.target.value)}
+                          className="w-full p-2 border border-gray-300 rounded"
+                          placeholder="e.g., 2-bed, 4-bed"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium">Price (in ₹)</label>
+                        <input
+                          type="number"
+                          value={room.price}
+                          onChange={(e) => handleRoomTypeChange(index, "price", e.target.value)}
+                          className="w-full p-2 border border-gray-300 rounded"
+                          placeholder="e.g., 100000"
+                        />
+                      </div>
+                    </div>
+                    <div className="mt-3">
+                      <label className="block text-sm font-medium">Room Amenities (comma separated)</label>
+                      <input
+                        type="text"
+                        value={room.amenities}
+                        onChange={(e) => handleRoomTypeChange(index, "amenities", e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded"
+                        placeholder="e.g., 2 beds, 2 shelves, AC"
+                      />
+                    </div>
+
+                    <div className="mt-3">
+                      <label className="block text-sm font-medium">Room Image</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleRoomImageUpload(index, e.target.files[0])}
+                        className="w-full p-2 border border-gray-300 rounded"
+                        disabled={uploadingRoom === index}
+                      />
+                      {uploadingRoom === index && <p className="text-blue-500 mt-2">Uploading...</p>}
+                      {room.image && <img src={room.image} alt="Room" className="mt-2 w-32 h-32 object-cover rounded" />}
+                    </div>
+                    <div className="mt-4 flex gap-4">
+                      {room.id ? (
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateRoom(index)}
+                          className="p-2 bg-green-600 text-white rounded"
+                        >
+                          Update Room
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleInsertRoom(index)}
+                          className="p-2 bg-purple-600 text-white rounded"
+                        >
+                          Insert Room
+                        </button>
+                      )}
+                    </div>
                     {formData.rooms.length > 1 && (
                       <button
                         type="button"
-                        onClick={() => removeRoomType(index)}
-                        className="p-2 bg-red-500 text-white rounded"
+                        onClick={() => removeRoomType(room.id)}
+                        className="mt-3 p-2 bg-red-500 text-white rounded"
                       >
-                        Remove
+                        Remove Room Type
                       </button>
                     )}
                   </div>
-
-                  <div className="mt-2">
-                    <label className="block text-sm font-medium">Room Image</label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleRoomImageUpload(index, e.target.files[0])}
-                      className="w-full p-2 border border-gray-300 rounded"
-                      disabled={uploadingRoom === index}
-                    />
-                    {uploadingRoom === index && <p className="text-blue-500 mt-2">Uploading...</p>}
-                    {room.image && <img src={room.image} alt="Room" className="mt-2 w-32 h-32 object-cover rounded" />}
-                  </div>
-                </div>
-              ))}
+                ))}
                 <button type="button" onClick={addRoomType} className="mt-2 p-2 bg-gray-200 rounded">
                   Add Room Type
                 </button>

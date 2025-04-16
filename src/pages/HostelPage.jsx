@@ -7,6 +7,7 @@ import axios from "axios";
 export default function HostelPage() {
   const { hostelId } = useParams();
   const [hostel, setHostel] = useState(null);
+  const [rooms, setRooms] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,6 +20,7 @@ export default function HostelPage() {
         });
         console.log("API Response:", response.data);
         setHostel(response.data.hostel);
+        setRooms(response.data.rooms);
       } catch (error) {
         console.error("Error fetching hostel:", error);
       } finally {
@@ -62,7 +64,7 @@ export default function HostelPage() {
         <div className="mt-6">
           <h2 className="text-lg font-medium mb-3">Room Types</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {hostel.rooms?.map((room, index) => (
+            {rooms?.map((room, index) => (
               <div key={index} className="flex items-center border rounded-md p-4 max-w-[70%]">
                 <div className="flex-1">
                   <h3 className="font-medium">{room.type}</h3>
@@ -74,7 +76,7 @@ export default function HostelPage() {
                     className="mt-2 rounded"
                   />
                 </div>
-                <Link to={`/hostels/${hostelId}/${room.type}`}>
+                <Link to={`/hostels/rooms/${room.id}`}>
                   <button className="bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white px-4 py-2 rounded-md">
                     Visit
                   </button>

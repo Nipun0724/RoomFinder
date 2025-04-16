@@ -6,18 +6,18 @@ import axios from "axios";
 
 
 export default function RoomDetailPage() {
-  const { hostelId, roomType } = useParams();
+  const { roomId } = useParams();
   const [roomData, setRoomData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [avgRating, setAvgRating]=useState(0)
 
   useEffect(() => {
-    if (!roomType) return;
+    if (!roomId) return;
 
     const fetchRoom = async () => {
       try {
         const response = await axios.get("https://roomfinder-0ouu.onrender.com/api/hostelRoom", {
-          params: { roomType, hostelId },
+          params: { roomId },
         });
         setRoomData(response.data.rooms[0]);
         console.log(roomData)
@@ -34,7 +34,7 @@ export default function RoomDetailPage() {
     };
 
     fetchRoom();
-  }, [roomType]);
+  }, [roomId]);
 
   if (loading) return <div>Loading...</div>;
   if (!roomData) return <div>Error loading room details.</div>;
@@ -73,7 +73,7 @@ export default function RoomDetailPage() {
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Reviews</h2>
             <Link
-              to={`/hostels/${hostelId}/${roomType}/review`}
+              to={`/hostels/${roomId}/review`}
               className="bg-[#0097b2] text-white px-4 py-2 rounded hover:bg-[#007a8f]">
               Add Review
             </Link>
