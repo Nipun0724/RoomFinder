@@ -43,7 +43,7 @@ export default function EditHostelPage() {
   useEffect(() => {
     const fetchHostels = async () => {
       try {
-        const response = await axios.get("https://roomfinder-0ouu.onrender.com/api/hostels");
+        const response = await axios.get("http://localhost:5173/api/hostels");
         setHostels(response.data.hostels);
       } catch (error) {
         console.error("Error fetching hostels:", error);
@@ -58,7 +58,7 @@ export default function EditHostelPage() {
       if (!selectedHostel) return;
       setLoading(true);
       try {
-        const response = await axios.get(`https://roomfinder-0ouu.onrender.com/api/hostel/${selectedHostel}`, {
+        const response = await axios.get(`http://localhost:5173/api/hostel/${selectedHostel}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         
@@ -108,7 +108,7 @@ export default function EditHostelPage() {
     formData2.append("avatar", file);
   
     try {
-      const response = await axios.post("https://roomfinder-0ouu.onrender.com/upload/pic", formData2, {
+      const response = await axios.post("http://localhost:5173/upload/pic", formData2, {
         headers: { "Content-Type": "multipart/form-data" },
       });
   
@@ -134,7 +134,7 @@ export default function EditHostelPage() {
       formData.append("avatar", file);
 
       try {
-        const response = await axios.post("https://roomfinder-0ouu.onrender.com/upload/pic", formData, {
+        const response = await axios.post("http://localhost:5173/upload/pic", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         setFormData((prevFormData) => {
@@ -162,7 +162,7 @@ export default function EditHostelPage() {
     try {
 
       await axios.put(
-        `https://roomfinder-0ouu.onrender.com/api/edit-hostel/${selectedHostel}`,
+        `http://localhost:5173/api/edit-hostel/${selectedHostel}`,
         hostelData,
         {
           headers: { Authorization: `Bearer ${token}` },
