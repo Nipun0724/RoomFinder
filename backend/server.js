@@ -145,11 +145,14 @@ app.get(
   (req, res) => {
     const token = req.user.token;
 
-    if (req.user.newUser) {
-      res.redirect(`http://localhost:5173/register?token=${token}`);
-    } else {
-      res.redirect(`http://localhost:5173/?token=${token}`);
-    }
+    const frontendBaseURL =
+      process.env.NODE_ENV === "production"
+        ? "https://roomfinder-0ouu.onrender.com"
+        : "http://localhost:5173";
+
+    const redirectPath = req.user.newUser ? "/register" : "/";
+
+    res.redirect(`${frontendBaseURL}${redirectPath}?token=${token}`);
   }
 );
 
