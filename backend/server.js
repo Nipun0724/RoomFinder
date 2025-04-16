@@ -244,10 +244,12 @@ app.get("/api/hostelRoom", async (req, res) => {
   }
 });
 
-app.post("/api/addReview",verifyToken, async (req, res) => {
-  const { roomType,hostelId, rating, review } = req.body;
-  const email=req.email;
+app.post("/api/addReview", verifyToken, async (req, res) => {
+  const { roomType, hostelId, rating, review } = req.body;
+  const email = req.email;
+
   try {
+    // Get existing reviews from room
     const { data, error } = await supabase
       .from("rooms")
       .select("reviews")
@@ -255,27 +257,32 @@ app.post("/api/addReview",verifyToken, async (req, res) => {
       .eq("block", hostelId);
 
     if (error) throw error;
-    
-    const existingReviews = data.reviews || [];
 
-    const { data:user, fetchError } = await supabase
+    const existingReviews = (data && data.length > 0 && data[0].reviews) || [];
+
+    // Get user info
+    const { data: user, error: fetchError } = await supabase
       .from("users")
       .select("*")
       .eq("email", email)
       .single();
 
-    const existingUserReviews = user.reviews || [];
-    if(fetchError) throw fetchError;
+    if (fetchError) throw fetchError;
 
+    const existingUserReviews = user.reviews || [];
+
+    // Create updated reviews
     const updatedReviews = [{ name: user.name, rating, review }, ...existingReviews];
     const updatedUserReviews = [{ rating, review }, ...existingUserReviews];
 
+    // Update room reviews
     const { error: updateError } = await supabase
       .from("rooms")
       .update({ reviews: updatedReviews })
       .eq("type", roomType)
       .eq("block", hostelId);
 
+    // Update user reviews
     const { error: updateUserError } = await supabase
       .from("users")
       .update({ reviews: updatedUserReviews })
