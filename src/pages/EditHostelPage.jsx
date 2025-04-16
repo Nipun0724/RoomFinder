@@ -169,10 +169,10 @@ export default function EditHostelPage() {
         }
       );
 
-      alert("Hostel updated successfully!");
+      toast.success("Hostel updated successfully!");
     } catch (error) {
       console.error("Error updating hostel:", error);
-      alert("Failed to update hostel.");
+      toast.error("Failed to update hostel.");
     } finally {
       setLoading(false);
     }
