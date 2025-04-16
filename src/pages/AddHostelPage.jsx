@@ -10,7 +10,7 @@ export default function AddHostelPage() {
     name: "",
     sex: "",
     description: "",
-    rooms: [{type: "", image: "" }],
+    rooms: [{ type: "", image: "", amenities: "", price: "" }],
     amenities: "",
     image: "",
   });
@@ -55,13 +55,14 @@ export default function AddHostelPage() {
       rooms: updatedRooms,
     });
   };
+  
 
   const addRoomType = () => {
     setFormData({
       ...formData,
-      rooms: [...formData.rooms, { type: "", image: "" }],
+      rooms: [...formData.rooms, { type: "", image: "", amenities: "", price: "" }],
     });
-  };
+  };  
   
   const handleRoomImageUpload = async (index, file) => {
     if (!file) return;
@@ -88,8 +89,6 @@ export default function AddHostelPage() {
     }
   };
   
-  
-
   const removeRoomType = (index) => {
     const updatedRooms = [...formData.rooms];
     updatedRooms.splice(index, 1);
@@ -165,10 +164,14 @@ export default function AddHostelPage() {
       name: formData.name,
       sex: formData.sex,
       description: formData.description,
-      rooms: formData.rooms,
+      image: formData.image,
       amenities: formData.amenities.split(",").map((a) => a.trim()),
-      image: formData.image
-    };
+      rooms: formData.rooms.map((room) => ({
+        ...room,
+        amenities: room.amenities.split(",").map((a) => a.trim()),
+        price: Number(room.price),
+      })),
+    };    
   
     try {
       await axios.post("https://roomfinder-0ouu.onrender.com/api/add-hostels", hostelData, {
@@ -259,7 +262,7 @@ export default function AddHostelPage() {
             <div>
               <label className="block text-sm font-medium mb-2">Room Types</label>
               {formData.rooms.map((room, index) => (
-                <div key={room.id} className="border p-3 mb-3 rounded-md">
+                <div key={index} className="border p-3 mb-3 rounded-md">
                   <div className="flex items-center space-x-2">
                     <input
                       type="text"
@@ -267,7 +270,6 @@ export default function AddHostelPage() {
                       onChange={(e) => handleRoomTypeChange(index, "type", e.target.value)}
                       className="flex-1 p-2 border border-gray-300 rounded"
                       placeholder="Room type (e.g., 2-bed, 4-bed)"
-                      
                     />
                     {formData.rooms.length > 1 && (
                       <button
@@ -280,7 +282,7 @@ export default function AddHostelPage() {
                     )}
                   </div>
 
-                  <div className="mt-2">
+                  <div className="mt-3">
                     <label className="block text-sm font-medium">Room Image</label>
                     <input
                       type="file"
@@ -291,6 +293,28 @@ export default function AddHostelPage() {
                     />
                     {uploadingRoom === index && <p className="text-blue-500 mt-2">Uploading...</p>}
                     {room.image && <img src={room.image} alt="Room" className="mt-2 w-32 h-32 object-cover rounded" />}
+                  </div>
+
+                  <div className="mt-3">
+                    <label className="block text-sm font-medium">Room Amenities (comma-separated)</label>
+                    <input
+                      type="text"
+                      value={room.amenities}
+                      onChange={(e) => handleRoomTypeChange(index, "amenities", e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded"
+                      placeholder="AC, Study Table, Wardrobe, etc."
+                    />
+                  </div>
+
+                  <div className="mt-3">
+                    <label className="block text-sm font-medium">Price (INR)</label>
+                    <input
+                      type="number"
+                      value={room.price}
+                      onChange={(e) => handleRoomTypeChange(index, "price", e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded"
+                      placeholder="Enter price"
+                    />
                   </div>
                 </div>
               ))}

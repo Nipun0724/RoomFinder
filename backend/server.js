@@ -309,14 +309,33 @@ app.get("/api/profile",verifyToken,async(req,res)=>{
 app.post("/api/add-hostels", verifyAdminToken, async (req, res) => {
   try {
     const { name, sex, description, rooms, amenities, image } = req.body;
-    
+
     const { data, error } = await supabase
       .from("hostels")
       .insert([{ name, sex, description, rooms, amenities, image }]);
 
     if (error) throw error;
+
+    for (const room of rooms) {
+      const { error: roomError } = await supabase
+        .from("rooms")
+        .insert([{
+          block: name,
+          type: room.type,
+          image: room.image,
+          price: room.price,
+          amenities: room.amenities
+        }]);
+
+      if (roomError) {
+        console.error("Error adding room:", roomError.message);
+        return res.status(500).json({ message: "Error adding room", error: roomError.message });
+      }
+    }
+
     res.status(201).json({ message: "Hostel added successfully", data });
   } catch (error) {
+    console.error("Error in /api/add-hostels:", error.message);
     res.status(500).json({ message: "Error adding hostel", error: error.message });
   }
 });
