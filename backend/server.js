@@ -203,7 +203,7 @@ app.get("/api/hostel", async (req, res) => {
     let { data: hostel, error } = await supabase
       .from("hostels")
       .select("*")
-      .eq("name", hostelId)
+      .eq("id", hostelId)
       .single();
 
     if (error) throw error;
