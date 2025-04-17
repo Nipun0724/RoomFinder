@@ -220,7 +220,7 @@ export default function EditHostelPage() {
           block: formData.name,
           id: room.id,
           type: room.type,
-          amenities: room.amenities,
+          amenities: room.amenities.split(",").map((a) => a.trim()),
           price: room.price,
           image: room.image,
         },
